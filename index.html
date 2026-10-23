@@ -74,6 +74,19 @@ dialog::backdrop{background:#1b2a1e80}
 .qrow{display:grid;grid-template-columns:1fr 1.2fr;gap:8px;margin-top:4px}.qrow input,.qrow select{margin-top:0}select:disabled{opacity:.65}
 .sug{display:flex;flex-direction:column;gap:6px}.sug[hidden]{display:none}.sg{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--in);border:0;border-radius:14px;padding:10px 14px;font:inherit;color:var(--tx);text-align:left}.sg small{color:var(--mu);font-size:12px}
 #fh:focus{outline:0}
+.meter{height:8px;background:var(--in);border-radius:5px;overflow:hidden;margin:6px 0 2px}.meter i{display:block;height:100%;border-radius:5px;transition:width .3s}
+#xn{padding:6px 16px}.nrow{padding:10px 0}.nrow+.nrow{border-top:1px solid var(--line)}.nt{display:flex;justify-content:space-between;align-items:baseline}.nt b{font:700 18px var(--serif)}.nrow small{color:var(--mu);font-size:12px}
+.ent{padding:0;overflow:hidden}.eb{flex:1;min-width:0;display:flex;justify-content:space-between;align-items:center;gap:12px;background:none;border:0;padding:14px 6px 14px 16px;font:inherit;color:inherit;text-align:left}.again{flex:none;align-self:stretch;width:54px;background:none;border:0;border-left:1px solid var(--line);color:var(--acc);font-size:22px}
+#toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translate(-50%,10px);background:#2a3328;color:#f7f0df;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:5}#toast.on{opacity:1;transform:translate(-50%,0)}
+#sheet{max-height:92vh;max-height:92dvh;overflow-y:auto}#ls{margin-bottom:6px}
+#segm{flex-wrap:wrap;border-radius:18px}#segm button{flex:1 1 auto;padding:9px 12px}
+.sw{display:flex;align-items:center;gap:12px;flex:1;min-width:0}.sw input{width:22px;height:22px;flex:none;padding:0;margin:0;accent-color:var(--acc)}
+.nsr{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.nsr:last-child{border:0}.nsr .gi{width:120px;flex:none;padding:8px 12px}
+#find{margin:auto auto 0;width:100%;max-width:560px;border-radius:28px 28px 0 0;padding:0;max-height:92vh;max-height:92dvh;overflow-y:auto}
+.srow{display:flex;gap:8px;margin-top:10px}.srow input{flex:1}
+.vwrap{position:relative;border-radius:16px;overflow:hidden;background:#000;margin-top:10px}#vid{width:100%;max-height:44vh;object-fit:cover;display:block}.aim{position:absolute;left:8%;right:8%;top:50%;height:2px;background:#ff5d5d;box-shadow:0 0 8px #ff5d5d}
+.rs{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:var(--in);border:0;border-radius:14px;padding:12px 14px;margin-top:8px;font:inherit;color:var(--tx);text-align:left}.rs small{color:var(--mu);font-size:12px}.rn{text-align:right;flex:none;font-size:14px}
+#fmsg:empty{display:none}.hint a{color:var(--acc)}
 </style>
 </head>
 <body>
@@ -85,27 +98,28 @@ dialog::backdrop{background:#1b2a1e80}
 <main>
 <section id="v-today">
   <div class="chips"><span class="chip"><b id="sp">0</b>protein streak</span><span class="chip"><b id="sc">0</b>calorie streak</span><span class="chip"><b id="st">0</b>tracking streak</span></div>
+  <div class="card" id="xn" hidden></div>
   <div class="card wcard"><span id="wl">Today's Weight</span><input id="w" type="number" step="any" inputmode="decimal" placeholder="lbs" aria-label="Weight"></div>
   <h2 class="sech">Food</h2>
   <div id="ents"></div>
-  <p class="hint" style="text-align:center">Type a food or recipe from your Recipes tab and enter how much. The numbers fill in for you.</p>
+  <p class="hint" style="text-align:center">Type a food or recipe from your Recipes tab and enter how much. The numbers fill in for you. Tap ↻ on any food to log it again today.</p>
 </section>
 <section id="v-trends" hidden>
   <div class="card">
-    <div class="seg" id="segm"><button data-m="weight">Weight</button><button data-m="cal">Calories</button><button data-m="pro">Protein</button></div>
+    <div class="seg" id="segm"></div>
     <div id="chart"></div>
     <p class="hint" id="sum"></p>
     <div class="seg" id="segr" style="margin:10px 0 0"><button data-r="W">Week</button><button data-r="M">Month</button><button data-r="Y">Year</button></div>
   </div>
 </section>
 <section id="v-lib" hidden>
-  <div class="card"><div id="liblist"></div></div>
+  <div class="card"><input id="ls" type="search" placeholder="Search recipes" aria-label="Search recipes" autocomplete="off"><div id="liblist"></div></div>
   <div class="card">
     <b id="lt">Add a food or recipe</b>
     <div class="f2"><label style="grid-column:1/3">Name<input id="ln"></label>
     <label>Measured by<select id="lu"><option value="g">gram</option><option value="oz">ounce</option><option value="floz">fluid ounce</option><option value="cup">cup</option><option value="serving">serving</option></select></label>
     <label>Calories per 1<input id="lc" type="number" step="any" inputmode="decimal"></label>
-    <label style="grid-column:1/3">Protein (g) per 1<input id="lp" type="number" step="any" inputmode="decimal"></label></div>
+    <label style="grid-column:1/3">Protein (g) per 1<input id="lp" type="number" step="any" inputmode="decimal"></label><div id="lx" style="display:contents"></div></div>
     <p class="hint">Banana: gram, 0.89 cal, 0.011 protein. Chicken and rice: serving, 450 cal, 35 protein.</p>
     <div class="btns"><button class="btn pri" id="ladd">Save</button></div>
   </div>
@@ -114,6 +128,11 @@ dialog::backdrop{background:#1b2a1e80}
   <div class="card">
     <b>Goals</b>
     <div class="f2"><label>Protein (g)<input id="gP" type="number" inputmode="numeric"></label><label>Calories<input id="gC" type="number" inputmode="numeric"></label><label style="grid-column:1/3">Calorie streak counts days you<select id="gM"><option value="min">reach at least the goal</option><option value="max">stay at or under the goal</option></select></label></div>
+  </div>
+  <div class="card">
+    <b>Extra nutrients</b>
+    <p class="hint">Turn on any you want to track. Each one gets its own field when you log food, a daily total, and a graph. Goals are optional.</p>
+    <div id="nset"></div>
   </div>
   <div class="card">
     <b>Your data</b>
@@ -129,9 +148,19 @@ dialog::backdrop{background:#1b2a1e80}
 <dialog id="sheet"><div class="si"><h2 id="fh" tabindex="-1" autofocus>Add food</h2>
 <div class="f2"><label style="grid-column:1/3">Food<input id="fn" autocomplete="off" placeholder="Start typing a food or recipe"></label>
 <div id="sug" class="sug" style="grid-column:1/3" hidden></div>
+<div class="btns" style="grid-column:1/3;margin-top:0"><button type="button" class="btn" id="fs">Search food database</button><button type="button" class="btn" id="fscan">Scan barcode</button></div>
 <label style="grid-column:1/3">Quantity<div class="qrow"><input id="fq" type="number" step="any" inputmode="decimal" aria-label="Amount"><select id="fm" aria-label="Measure"><option value="">No measure</option><option value="g">grams</option><option value="oz">ounces</option><option value="floz">fluid ounces</option><option value="cup">cups</option><option value="serving">servings</option></select></div></label>
-<label>Calories<input id="fc" type="number" step="any" inputmode="decimal"></label><label>Protein (g)<input id="fp" type="number" step="any" inputmode="decimal"></label></div>
-<div class="btns" style="justify-content:flex-end;margin-top:18px"><button class="btn del" id="fdel" hidden>Remove</button><button class="btn" id="fcx">Cancel</button><button class="btn pri" id="fsv">Save</button></div></div></dialog>
+<label>Calories<input id="fc" type="number" step="any" inputmode="decimal"></label><label>Protein (g)<input id="fp" type="number" step="any" inputmode="decimal"></label><div id="fx" style="display:contents"></div></div>
+<div class="btns" style="justify-content:flex-end;margin-top:18px"><button class="btn" id="fsave" hidden>Save to recipes</button><button class="btn del" id="fdel" hidden>Remove</button><button class="btn" id="fcx">Cancel</button><button class="btn pri" id="fsv">Save</button></div></div></dialog>
+<dialog id="find"><div class="si"><h2 id="fh2" tabindex="-1" autofocus>Find a food</h2>
+<div class="srow"><input id="fqry" type="search" enterkeyhint="search" placeholder="Name or barcode number" autocomplete="off" aria-label="Search the food database"><button class="btn pri" id="fgo">Search</button></div>
+<div class="btns"><button class="btn" id="fcam">Scan barcode</button><button class="btn" id="fpho">Photo of barcode</button><input type="file" id="fphoto" accept="image/*" capture="environment" hidden></div>
+<div id="scanbox" hidden><div class="vwrap"><video id="vid" playsinline muted autoplay></video><i class="aim"></i></div><div class="btns"><button class="btn" id="fflip" hidden>Flip camera</button><button class="btn" id="fstop">Stop camera</button></div></div>
+<p class="hint" id="fmsg" role="status"></p>
+<div id="fres"></div>
+<p class="hint">Food data from <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a>. Nutrition is per 100 g and can be incomplete, so check it.</p>
+<div class="btns" style="justify-content:flex-end"><button class="btn" id="fclose">Close</button></div></div></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
 <nav class="tabs" role="tablist"><button data-t="today">Today</button><button data-t="trends">Trends</button><button data-t="lib">Recipes</button><button data-t="set">User</button></nav>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -139,6 +168,9 @@ const K='seed-v1';
 let db;try{db=JSON.parse(localStorage.getItem(K)||localStorage.getItem('tally-v1'))}catch(e){}
 db=db||{days:{},lib:{},goals:{p:200,c:3000,mode:'min'}};
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}};
+const NUT=[{k:'cb',n:'Carbs',u:'g',col:'#d98c5f'},{k:'ft',n:'Fat',u:'g',col:'#c9a227'},{k:'fb',n:'Fiber',u:'g',col:'#6aa56f'},{k:'sg',n:'Sugar',u:'g',col:'#d96b8a'},{k:'na',n:'Sodium',u:'mg',col:'#5b8fc9'}];
+db.on=db.on||{};
+const act=()=>NUT.filter(n=>db.on[n.k]);
 const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
 const today=()=>iso(new Date());
 const add=(k,n)=>{const d=new Date(k+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)};
@@ -146,7 +178,7 @@ const rnd=x=>Math.round(x*10)/10;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let cur=today(),tab='today',rng='W',met='weight';
 const day=k=>db.days[k]||(db.days[k]={items:[],w:null});
-const sum=d=>(d?d.items:[]).reduce((a,x)=>(a.c+=+x.c||0,a.p+=+x.p||0,a),{c:0,p:0});
+const sum=d=>(d?d.items:[]).reduce((a,x)=>{a.c+=+x.c||0;a.p+=+x.p||0;NUT.forEach(n=>a[n.k]+=+x[n.k]||0);return a},Object.assign({c:0,p:0},...NUT.map(n=>({[n.k]:0}))));
 const used=d=>d&&d.items.some(x=>x.n||x.c||x.p);
 
 function ok(k,kind){const d=db.days[k];if(!used(d))return false;const t=sum(d),g=db.goals;
@@ -158,7 +190,7 @@ function render(){
   $$('section').forEach(s=>s.hidden=s.id!=='v-'+tab);
   $$('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===tab));
   $('#hero').style.display=tab==='today'?'block':'none';$('#fab').style.display=tab==='today'?'block':'none';
-  ({today:rToday,trends:rTrends,lib:rLib,set:rSet})[tab]();
+  ({today:rToday,trends:rTrends,lib:()=>{buildLx();rLib()},set:rSet})[tab]();
 }
 const lk=n=>n.trim().toLowerCase();
 function qlabel(it){
@@ -179,21 +211,28 @@ function rToday(){
   $('#cl').textContent=lc>=0?Math.round(lc)+' to go':Math.round(-lc)+' over';
   $('#pl').textContent=lp>0?Math.round(lp)+' g to go':'goal reached';
   $('#wl').textContent=cur===today()?"Today's Weight":'Weight';
-  $('#ents').innerHTML=d.items.length?d.items.map((it,i)=>`<button class="ent" data-i="${i}"><span><b>${esc(it.n)||'Unnamed'}</b><small>${esc(qlabel(it))}</small></span><span class="nums"><b>${Math.round(it.c||0)}</b> cal<small>${rnd(+it.p||0)} g protein</small></span></button>`).join(''):'<p class="empty">Nothing logged yet. Tap + to add your first food.</p>';
+  const A=act();$('#xn').hidden=!A.length;
+  $('#xn').innerHTML=A.map(n=>{const v=t[n.k],gl=+db.goals[n.k]||0;return `<div class="nrow"><div class="nt"><span>${n.n}</span><b>${rnd(v)} ${n.u}</b></div>${gl?`<div class="meter"><i style="width:${Math.min(100,v/gl*100)}%;background:${n.col}"></i></div><small>${v<gl?rnd(gl-v)+' '+n.u+' to go':'goal reached'}</small>`:''}</div>`}).join('');
+  $('#ents').innerHTML=d.items.length?d.items.map((it,i)=>{
+    const xl=A.filter(n=>+it[n.k]).map(n=>rnd(+it[n.k])+' '+n.u+' '+n.n.toLowerCase()).join(', ');
+    return `<div class="ent" data-i="${i}"><button class="eb"><span><b>${esc(it.n)||'Unnamed'}</b><small>${esc(qlabel(it))}</small><small>${esc(xl)}</small></span><span class="nums"><b>${Math.round(it.c||0)}</b> cal<small>${rnd(+it.p||0)} g protein</small></span></button><button class="again" aria-label="Log again" title="Log again">↻</button></div>`}).join(''):'<p class="empty">Nothing logged yet. Tap + to add your first food.</p>';
   $('#w').value=d.w??'';
   $('#sp').textContent=streak('p');$('#sc').textContent=streak('c');$('#st').textContent=streak('t');
 }
 let ei=null;
-function fhint(){const l=db.lib[lk($('#fn').value)],m=$('#fm');if(l){m.value=l.u||'serving';m.disabled=true}else m.disabled=false;return l}
+let fbase=null;
+const fl=()=>{const n=lk($('#fn').value);return db.lib[n]||(fbase&&lk(fbase.n)===n?fbase:null)};
+function fhint(){const l=fl(),m=$('#fm');if(l){m.value=l.u||'serving';m.disabled=true}else m.disabled=false;
+  $('#fsave').hidden=!(fbase&&!db.lib[lk(fbase.n)]&&lk(fbase.n)===lk($('#fn').value));return l}
 function sfill(byName){
   const l=fhint();if(!l)return;
   if(byName&&!$('#fq').value)$('#fq').value=1;
-  const q=+$('#fq').value;if(q>0){$('#fc').value=rnd(l.c*q);$('#fp').value=rnd(l.p*q)}
+  const q=+$('#fq').value;if(q>0){$('#fc').value=rnd(l.c*q);$('#fp').value=rnd((l.p||0)*q);act().forEach(n=>{const f=$('#fx-'+n.k);if(f&&l[n.k]!=null)f.value=rnd(l[n.k]*q)})}
 }
 function openSheet(i){
-  ei=i;$('#sug').hidden=true;const it=i==null?{n:'',q:'',c:'',p:''}:db.days[cur].items[i];
+  ei=i;fbase=null;$('#sug').hidden=true;const it=i==null?{n:'',q:'',c:'',p:''}:db.days[cur].items[i];
   $('#fh').textContent=i==null?'Add food':'Edit food';
-  $('#fn').value=it.n;$('#fq').value=it.q;$('#fc').value=it.c;$('#fp').value=it.p;$('#fm').value=it.u||'';fhint();
+  $('#fn').value=it.n;$('#fq').value=it.q;$('#fc').value=it.c;$('#fp').value=it.p;$('#fm').value=it.u||'';$('#fx').innerHTML=act().map(n=>`<label>${n.n} (${n.u})<input id="fx-${n.k}" type="number" step="any" inputmode="decimal"></label>`).join('');act().forEach(n=>{$('#fx-'+n.k).value=it[n.k]??''});fhint();
   $('#fdel').hidden=i==null;$('#sheet').showModal();if(i==null)$('#fn').focus();else $('#fh').focus();
 }
 function suggest(){
@@ -205,17 +244,191 @@ function suggest(){
 $('#fn').oninput=()=>{sfill(1);suggest()};$('#fq').oninput=()=>sfill(0);
 $('#sug').onclick=e=>{const b=e.target.closest('.sg');if(!b)return;$('#fn').value=b.dataset.n;$('#sug').hidden=true;sfill(1);$('#fq').focus()};
 $('#fab').onclick=()=>openSheet(null);
-$('#ents').onclick=e=>{const b=e.target.closest('.ent');if(b)openSheet(+b.dataset.i)};
+$('#ents').onclick=e=>{const r=e.target.closest('.ent');if(!r)return;const i=+r.dataset.i;
+  if(e.target.closest('.again')){day(today()).items.push({...db.days[cur].items[i]});save();toast(cur===today()?'Logged again':'Added to today');rToday();return}
+  openSheet(i)};
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),1800)}
 $('#fcx').onclick=()=>$('#sheet').close();
 $('#sheet').onclick=e=>{if(e.target===e.currentTarget)e.currentTarget.close()};
 $('#fsv').onclick=()=>{
   const n=$('#fn').value.trim();
   const num=id=>{const v=$(id).value;return v===''?'':+v};
-  const it={n,q:num('#fq'),u:$('#fm').value,c:num('#fc'),p:num('#fp')},d=day(cur);
+  const d=day(cur),it={...(ei==null?{}:d.items[ei]),n,q:num('#fq'),u:$('#fm').value,c:num('#fc'),p:num('#fp')};act().forEach(x=>{it[x.k]=num('#fx-'+x.k)});
   if(ei==null)d.items.push(it);else d.items[ei]=it;
   save();$('#sheet').close();rToday();
 };
 $('#fdel').onclick=async()=>{if(await ask('Remove this food from the day?')){day(cur).items.splice(ei,1);save();$('#sheet').close();rToday()}};
+/* ---- food database (Open Food Facts) + barcode scanning ---- */
+const OFF='https://world.openfoodfacts.org',SAL='https://search.openfoodfacts.org',FIELDS='code,product_name,brands,nutriments,serving_quantity,serving_size';
+const fmsg=m=>{$('#fmsg').textContent=m};
+async function jget(u){const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)throw new Error(r.status);return await r.json()}finally{clearTimeout(t)}}
+const nm=v=>v!=null&&v!==''&&isFinite(+v)?+v:null;
+function norm(p){
+  const n=p&&p.nutriments;if(!n)return null;
+  let kc=nm(n['energy-kcal_100g']);if(kc==null){const kj=nm(n.energy_100g);kc=kj==null?null:kj/4.184}
+  if(kc==null)return null;
+  const per=k=>{const v=nm(n[k]);return v==null?null:v/100};
+  let so=nm(n.sodium_100g);if(so==null){const sl=nm(n.salt_100g);so=sl==null?null:sl/2.5}
+  const b={u:'g',c:kc/100,p:per('proteins_100g')||0,cb:per('carbohydrates_100g'),ft:per('fat_100g'),fb:per('fiber_100g'),sg:per('sugars_100g'),na:so==null?null:so*10};
+  Object.keys(b).forEach(k=>{if(b[k]==null)delete b[k]});
+  const sv=nm(p.serving_quantity);
+  return {name:String(p.product_name||'').trim()||'Unnamed product',brand:String(p.brands||'').split(',')[0].trim(),base:b,serve:sv>0?sv:0};
+}
+let found=[];
+async function doSearch(q){
+  q=q.trim();if(!q)return;
+  stopScan();fmsg('Searching…');$('#fres').innerHTML='';found=[];
+  try{
+    let items=[];
+    if(/^\d{8,14}$/.test(q)){
+      const j=await jget(`${OFF}/api/v2/product/${q}.json?fields=${FIELDS}`);
+      if(!(j&&j.status===1&&j.product)){fmsg('That barcode is not in Open Food Facts yet. You can enter the food by hand.');return}
+      items=[norm(j.product)].filter(Boolean);
+      if(!items.length){fmsg('Found "'+(j.product.product_name||'this product')+'" but it has no nutrition info. You can enter it by hand.');return}
+    }else{
+      const srcs=[async()=>(await jget(`${SAL}/search?q=${encodeURIComponent(q)}&page_size=12&fields=${FIELDS}`)).hits,
+                  async()=>(await jget(`${OFF}/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=12&fields=${FIELDS}`)).products];
+      let ok=false;
+      for(const f of srcs){try{const l=await f();if(Array.isArray(l)){ok=true;items=l.map(norm).filter(Boolean);if(items.length)break}}catch(e){}}
+      if(!ok)throw new Error('net');
+      if(!items.length){fmsg('No foods with nutrition info found. Try fewer or different words.');return}
+    }
+    found=items;
+    $('#fres').innerHTML=items.map((r,i)=>`<button class="rs" data-i="${i}"><span><b>${esc(r.name)}</b><br><small>${esc(r.brand)}</small></span><span class="rn">${Math.round(r.base.c*100)} cal<br><small>${rnd((r.base.p||0)*100)} g protein, per 100 g</small></span></button>`).join('');
+    fmsg(items.length===1?'Found it. Tap it to use it.':items.length+' results. Tap one to use it.');
+  }catch(e){fmsg("Couldn't reach Open Food Facts. Check your connection and try again.")}
+}
+function useResult(r){
+  let n=r.name;if(db.lib[lk(n)])n+=r.brand?' ('+r.brand+')':' (scanned)';
+  fbase={...r.base,n};
+  $('#fn').value=n;$('#fq').value=r.serve||100;$('#sug').hidden=true;
+  $('#find').close();sfill(0);
+}
+$('#fres').onclick=e=>{const b=e.target.closest('.rs');if(b)useResult(found[+b.dataset.i])};
+$('#fgo').onclick=()=>doSearch($('#fqry').value);
+$('#fqry').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();doSearch($('#fqry').value)}};
+function openFind(scan){$('#fres').innerHTML='';found=[];fmsg('');$('#find').showModal();if(scan)startScan();else $('#fqry').focus()}
+$('#fs').onclick=()=>openFind(false);$('#fscan').onclick=()=>openFind(true);
+$('#fcam').onclick=startScan;$('#fstop').onclick=()=>{stopScan();fmsg('')};
+$('#fflip').onclick=()=>{facing=facing==='environment'?'user':'environment';startScan()};
+$('#fclose').onclick=()=>$('#find').close();
+$('#find').onclose=stopScan;
+$('#find').onclick=e=>{if(e.target===e.currentTarget)e.currentTarget.close()};
+$('#fsave').onclick=()=>{const n=$('#fn').value.trim();if(!fbase||!n)return;db.lib[lk(n)]={...fbase,n};save();fbase=null;fhint();toast('Saved to recipes')};
+
+/* camera + photo */
+let det=null,detTried=false,stream=null,scanning=false,facing='environment';
+const cv=document.createElement('canvas');
+async function prepDecoder(){
+  if(detTried)return;detTried=true;
+  if('BarcodeDetector'in window){try{const f=await BarcodeDetector.getSupportedFormats(),w=['ean_13','ean_8','upc_a','upc_e'].filter(x=>f.includes(x));if(w.length)det=new BarcodeDetector({formats:w})}catch(e){}}
+}
+async function grab(src,w,h,maxw){
+  if(det){try{const r=await det.detect(src);if(r&&r[0]&&r[0].rawValue)return r[0].rawValue}catch(e){}}
+  const sc=Math.min(1,maxw/w),cw=Math.round(w*sc),ch=Math.round(h*sc);
+  cv.width=cw;cv.height=ch;const x=cv.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,cw,ch);
+  return decodeBarcode(x.getImageData(0,0,cw,ch));
+}
+function stopScan(){scanning=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$('#vid').srcObject=null;$('#scanbox').hidden=true}
+async function startScan(){
+  stopScan();
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){fmsg('The camera is not available in this browser. Use "Photo of barcode" or type the number.');return}
+  fmsg('Starting camera…');
+  let st;
+  try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:720}},audio:false})}
+  catch(err){const n=err&&err.name;
+    fmsg(n==='NotAllowedError'||n==='SecurityError'?'Camera access is blocked. Allow the camera for this site in your browser or phone settings, then try again. You can also use "Photo of barcode".':n==='NotFoundError'||n==='OverconstrainedError'?'No camera found. Use "Photo of barcode" or type the number.':'The camera could not start. Use "Photo of barcode" or type the number.');return}
+  if(!$('#find').open){st.getTracks().forEach(t=>t.stop());return}
+  stream=st;const v=$('#vid');v.srcObject=st;try{await v.play()}catch(e){}
+  $('#scanbox').hidden=false;fmsg('Point the camera at the barcode.');
+  navigator.mediaDevices.enumerateDevices().then(d=>{$('#fflip').hidden=d.filter(x=>x.kind==='videoinput').length<2}).catch(()=>{});
+  await prepDecoder();scanning=true;let last=null;
+  while(scanning&&stream===st){
+    if(v.readyState>=2&&v.videoWidth){const c=await grab(v,v.videoWidth,v.videoHeight,960);
+      if(c&&scanning&&stream===st&&(det||c===last)){$('#fqry').value=c;if(navigator.vibrate)navigator.vibrate(60);doSearch(c);return}
+      last=c}
+    await new Promise(r=>setTimeout(r,180));
+  }
+}
+$('#fpho').onclick=()=>$('#fphoto').click();
+$('#fphoto').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  stopScan();fmsg('Reading the barcode…');
+  try{
+    await prepDecoder();
+    let src;if(window.createImageBitmap)src=await createImageBitmap(f);else{src=new Image();src.src=URL.createObjectURL(f);await src.decode()}
+    const w=src.width||src.naturalWidth,h=src.height||src.naturalHeight;
+    const c=await grab(src,w,h,1600);
+    if(c){$('#fqry').value=c;doSearch(c)}else fmsg("Couldn't read a barcode in that photo. Try again closer, flat on and in good light, or type the number.");
+  }catch(err){fmsg('That photo could not be opened.')}
+};
+
+/* barcode reader for browsers without BarcodeDetector (EAN-13, UPC-A, EAN-8) */
+const rl=s=>{const o=[];let c=1;for(let i=1;i<=s.length;i++){if(s[i]===s[i-1])c++;else{o.push(c);c=1}}return o};
+const LP=['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'].map(rl);
+const GP=['0100111','0110011','0011011','0100001','0011101','0111001','0000101','0010001','0001001','0010111'].map(rl);
+const RP=['1110010','1100110','1101100','1000010','1011100','1001110','1010000','1000100','1001000','1110100'].map(rl);
+const PAR=['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+function dig(R,a,sets){
+  const t=R[a]+R[a+1]+R[a+2]+R[a+3];if(!(t>0))return null;
+  let best=null,be=1e9;
+  for(const [nme,P] of sets)for(let d=0;d<10;d++){let e=0;for(let k=0;k<4;k++)e+=Math.abs(R[a+k]*7/t-P[d][k]);if(e<be){be=e;best=[d,nme]}}
+  return be<2.2?best:null;
+}
+function checkOk(ds){let s=0,w=1;for(let i=ds.length-1;i>=0;i--){s+=ds[i]*w;w=w===1?3:1}return s%10===0}
+function tryAt(R,B,i,n){
+  if(!B[i]||i+3+n*8+11>R.length)return null;
+  const m=(R[i]+R[i+1]+R[i+2])/3;
+  if(i>0&&R[i-1]<m*2.5)return null;
+  const g=(a,b)=>{for(let k=a;k<b;k++)if(R[k]<m*.55||R[k]>m*1.7)return false;return true};
+  const c=i+3+n*4,e=c+5+n*4;
+  if(!g(i,i+3)||!g(c,c+5)||!g(e,e+3))return null;
+  if(e+3<R.length-1&&R[e+3]<m*2.5)return null;
+  const ds=[];let par='';
+  for(let k=0;k<n;k++){const r=dig(R,i+3+k*4,[['L',LP],['G',GP]]);if(!r)return null;ds.push(r[0]);par+=r[1]}
+  for(let k=0;k<n;k++){const r=dig(R,c+5+k*4,[['R',RP]]);if(!r)return null;ds.push(r[0])}
+  if(n===6){const f=PAR.indexOf(par);if(f<0)return null;ds.unshift(f)}else if(par!=='LLLL')return null;
+  return checkOk(ds)?ds.join(''):null;
+}
+function lineRuns(L,soft){
+  const n=L.length,sm=new Float32Array(n);
+  for(let i=0;i<n;i++)sm[i]=soft?(L[Math.max(0,i-1)]+2*L[i]+L[Math.min(n-1,i+1)])/4:L[i];
+  const wd=Math.max(24,n>>3),R=[],B=[];
+  let pos=0,zc=0,prev=0,st=0;
+  for(let i=0;i<n;i++){
+    let lo=255,hi=0;
+    for(let j=Math.max(0,i-wd);j<Math.min(n,i+wd+1);j+=3){const v=sm[j];if(v<lo)lo=v;if(v>hi)hi=v}
+    const T=Math.max(8,(hi-lo)*.12),s=sm[i]-(lo+hi)/2,flat=hi-lo<24;
+    if(i===0)st=s<0?1:0;
+    else if((prev<0)!==(s<0))zc=i-1+prev/(prev-s);
+    if(!flat){
+      if(st===0&&s<-T){zc=Math.max(zc,pos+.01);R.push(zc-pos);B.push(0);pos=zc;st=1}
+      else if(st===1&&s>T){zc=Math.max(zc,pos+.01);R.push(zc-pos);B.push(1);pos=zc;st=0}
+    }
+    prev=s;
+  }
+  R.push(n-pos);B.push(st);
+  return [R,B];
+}
+function scanLine(L){
+  for(const soft of [1,0]){
+    let [R,B]=lineRuns(L,soft);
+    for(let d=0;d<2;d++){
+      for(let i=0;i<R.length-40;i++){if(!B[i])continue;const r=tryAt(R,B,i,6)||tryAt(R,B,i,4);if(r)return r}
+      R=R.slice().reverse();B=B.slice().reverse();
+    }
+  }
+  return null;
+}
+function decodeBarcode(im){
+  const d=im.data,w=im.width,h=im.height,F=[];for(let k=0;k<21;k++)F.push(.06+k*.044);
+  const lum=o=>(d[o]*77+d[o+1]*150+d[o+2]*29)>>8,votes={};let single=null;
+  const add=r=>{if(!r)return null;votes[r]=(votes[r]||0)+1;if(votes[r]>=2)return r;if(r.length===13)single=single||r;return null};
+  for(const f of F){const y=Math.floor(h*f),L=new Uint8Array(w);for(let x=0;x<w;x++)L[x]=lum((y*w+x)*4);const r=add(scanLine(L));if(r)return r}
+  for(const f of F){const x=Math.floor(w*f),L=new Uint8Array(h);for(let y=0;y<h;y++)L[y]=lum((y*w+x)*4);const r=add(scanLine(L));if(r)return r}
+  return single;
+}
+
 $('#w').oninput=e=>{day(cur).w=e.target.value===''?null:+e.target.value;save()};
 $('#prev').onclick=()=>{cur=add(cur,-1);rToday()};
 $('#next').onclick=()=>{if(cur<today()){cur=add(cur,1);rToday()}};
@@ -224,7 +437,7 @@ $('#next').onclick=()=>{if(cur<today()){cur=add(cur,1);rToday()}};
 const COL={weight:'#9b6fc7',cal:'#e8902f',pro:'#5f9a63'};
 function val(k){const d=db.days[k];if(!d)return null;
   if(met==='weight')return d.w===''||d.w==null?null:+d.w;
-  if(!used(d))return null;const t=sum(d);return met==='cal'?t.c:t.p}
+  if(!used(d))return null;const t=sum(d);return met==='cal'?t.c:met==='pro'?t.p:t[met]}
 function series(){
   const o=[],t=new Date();
   if(rng==='Y'){for(let i=11;i>=0;i--){const d=new Date(t.getFullYear(),t.getMonth()-i,1),pre=iso(d).slice(0,7);
@@ -234,15 +447,17 @@ function series(){
     o.push({l:rng==='W'?new Date(k+'T12:00').toLocaleDateString(undefined,{weekday:'short'}):(i%5==0?String(+k.slice(8)):''),v:val(k)})}}
   return o}
 function rTrends(){
+  const SEG=[['weight','Weight'],['cal','Calories'],['pro','Protein'],...act().map(n=>[n.k,n.n])];if(!SEG.some(x=>x[0]===met))met='weight';
+  $('#segm').innerHTML=SEG.map(x=>`<button data-m="${x[0]}">${x[1]}</button>`).join('');
   $$('#segm button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===met));
   $$('#segr button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===rng));
   const s=series(),vs=s.filter(x=>x.v!=null);
   if(!vs.length){$('#chart').innerHTML='<p class="hint" style="padding:30px 0;text-align:center">No data in this range yet. Log a day and it shows up here.</p>';$('#sum').textContent='';return}
-  const W=340,H=190,L=38,R=8,T=10,B=22,g=met==='cal'?db.goals.c:met==='pro'?db.goals.p:null,bar=met!=='weight';
+  const W=340,H=190,L=38,R=8,T=10,B=22,NG=NUT.find(n=>n.k===met),g=met==='cal'?db.goals.c:met==='pro'?db.goals.p:NG?(+db.goals[met]||null):null,bar=met!=='weight';
   let lo=Math.min(...vs.map(x=>x.v)),hi=Math.max(...vs.map(x=>x.v));
   if(bar){lo=0;hi=Math.max(hi,g)*1.1}else{lo-=1;hi+=1}
-  const X=i=>L+(bar?(i+.5)/s.length:s.length>1?i/(s.length-1):.5)*(W-L-R),Y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B),c=COL[met];
-  let o=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${met} chart">`;
+  const X=i=>L+(bar?(i+.5)/s.length:s.length>1?i/(s.length-1):.5)*(W-L-R),Y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B),c=NG?NG.col:COL[met];
+  let o=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${NG?NG.n:met} chart">`;
   [lo,(lo+hi)/2,hi].forEach(v=>o+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e0d5bb"/><text x="${L-4}" y="${Y(v)+3}" text-anchor="end">${Math.round(v)}</text>`);
   if(g!=null)o+=`<line x1="${L}" x2="${W-R}" y1="${Y(g)}" y2="${Y(g)}" stroke="#6b5a66" stroke-dasharray="4 3" opacity=".6"/>`;
   if(bar){const bw=(W-L-R)/s.length*.62;s.forEach((x,i)=>{if(x.v!=null)o+=`<rect x="${X(i)-bw/2}" y="${Y(x.v)}" width="${bw}" height="${Y(lo)-Y(x.v)}" rx="3" fill="${c}"/>`})}
@@ -250,8 +465,8 @@ function rTrends(){
     o+=`<polyline fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" points="${pts.map(p=>p.join(',')).join(' ')}"/>`+pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${c}"/>`).join('')}
   s.forEach((x,i)=>{if(x.l)o+=`<text x="${X(i)}" y="${H-6}" text-anchor="middle">${esc(x.l)}</text>`});
   $('#chart').innerHTML=o+'</svg>';
-  const avg=vs.reduce((a,x)=>a+x.v,0)/vs.length,u=met==='weight'?'':met==='cal'?' cal':' g';
-  $('#sum').textContent=(rng==='Y'?'Monthly average of daily ':'Average ')+Math.round(avg*10)/10+u+(met==='weight'&&vs.length>1?'. Change over range: '+(vs[vs.length-1].v-vs[0].v>0?'+':'')+rnd(vs[vs.length-1].v-vs[0].v):'')+(g!=null?'. Goal '+g+(met==='pro'?' g':''):'')+'.';
+  const avg=vs.reduce((a,x)=>a+x.v,0)/vs.length,u=met==='weight'?'':met==='cal'?' cal':NG?' '+NG.u:' g';
+  $('#sum').textContent=(rng==='Y'?'Monthly average of daily ':'Average ')+Math.round(avg*10)/10+u+(met==='weight'&&vs.length>1?'. Change over range: '+(vs[vs.length-1].v-vs[0].v>0?'+':'')+rnd(vs[vs.length-1].v-vs[0].v):'')+(g!=null?'. Goal '+g+(met==='pro'?' g':NG?' '+NG.u:''):'')+'.';
 }
 $('#segm').onclick=e=>{if(e.target.dataset.m){met=e.target.dataset.m;rTrends()}};
 $('#segr').onclick=e=>{if(e.target.dataset.r){rng=e.target.dataset.r;rTrends()}};
@@ -260,20 +475,29 @@ $('#segr').onclick=e=>{if(e.target.dataset.r){rng=e.target.dataset.r;rTrends()}}
 const UL={g:'grams',oz:'ounces',floz:'fl oz',cup:'cups',serving:'servings'},U1={g:'gram',oz:'ounce',floz:'fl oz',cup:'cup',serving:'serving'};
 const P3=x=>Math.round(x*1000)/1000;
 const unitLbl=n=>{const l=db.lib[lk(n)];return l?'Qty in '+UL[l.u||'serving']:''};
+function buildLx(){$('#lx').innerHTML=act().map(n=>`<label>${n.n} (${n.u}) per 1<input id="lx-${n.k}" type="number" step="any" inputmode="decimal"></label>`).join('')}
 function rLib(){
-  const a=Object.entries(db.lib).sort((x,y)=>x[1].n.localeCompare(y[1].n));
-  $('#liblist').innerHTML=a.length?a.map(([k,l])=>`<div class="li" data-k="${esc(k)}"><span>${esc(l.n)}<br><span class="lbl">per 1 ${U1[l.u||'serving']}: ${P3(l.c)} cal, ${P3(l.p)} g protein</span></span><button class="x" aria-label="Delete ${esc(l.n)}">×</button></div>`).join('')+'<p class="hint">Tap a food to edit it.</p>':'<p class="hint">Nothing saved yet. Add your foods and recipes below.</p>';
+  const q=$('#ls').value.trim().toLowerCase(),A=act();
+  const all=Object.entries(db.lib).sort((x,y)=>x[1].n.localeCompare(y[1].n,undefined,{sensitivity:'base'}));
+  const a=q?all.filter(([k,l])=>l.n.toLowerCase().includes(q)):all;
+  $('#liblist').innerHTML=a.length?a.map(([k,l])=>`<div class="li" data-k="${esc(k)}"><span>${esc(l.n)}<br><span class="lbl">per 1 ${U1[l.u||'serving']}: ${P3(l.c)} cal, ${P3(l.p)} g protein${A.filter(n=>l[n.k]!=null).map(n=>', '+P3(l[n.k])+' '+n.u+' '+n.n.toLowerCase()).join('')}</span></span><button class="x" aria-label="Delete ${esc(l.n)}">×</button></div>`).join('')+'<p class="hint">Tap a food to edit it.</p>':(all.length?'<p class="hint">No matches.</p>':'<p class="hint">Nothing saved yet. Add your foods and recipes below.</p>');
 }
+$('#ls').oninput=rLib;
 function ask(m){return new Promise(r=>{const d=$('#dlg');$('#dm').textContent=m;d.onclose=()=>r(d.returnValue==='y');$('#dy').onclick=()=>d.close('y');$('#dn').onclick=()=>d.close('n');d.showModal()})}
 $('#liblist').onclick=async e=>{const li=e.target.closest('.li');if(!li)return;const k=li.dataset.k,l=db.lib[k];
   if(e.target.closest('.x')){if(await ask('Delete "'+l.n+'" from your recipes?')){delete db.lib[k];save();rLib()}return}
-  $('#ln').value=l.n;$('#lu').value=l.u||'serving';$('#lc').value=P3(l.c);$('#lp').value=P3(l.p);$('#lt').textContent='Edit '+l.n;$('#ln').scrollIntoView({block:'center'})};
+  $('#ln').value=l.n;$('#lu').value=l.u||'serving';$('#lc').value=P3(l.c);$('#lp').value=P3(l.p);act().forEach(n=>{const f=$('#lx-'+n.k);if(f)f.value=l[n.k]!=null?P3(l[n.k]):''});$('#lt').textContent='Edit '+l.n;$('#ln').scrollIntoView({block:'center'})};
 $('#ladd').onclick=()=>{const n=$('#ln').value.trim();if(!n)return;
-  db.lib[lk(n)]={n,u:$('#lu').value,c:+$('#lc').value||0,p:+$('#lp').value||0};save();
-  ['#ln','#lc','#lp'].forEach(i=>$(i).value='');$('#lt').textContent='Add a food or recipe';rLib()};
+  const o={...(db.lib[lk(n)]||{}),n,u:$('#lu').value,c:+$('#lc').value||0,p:+$('#lp').value||0};
+  act().forEach(x=>{const v=$('#lx-'+x.k).value;if(v!=='')o[x.k]=+v;else delete o[x.k]});
+  db.lib[lk(n)]=o;save();
+  ['#ln','#lc','#lp'].forEach(i=>$(i).value='');$$('#lx input').forEach(i=>i.value='');$('#lt').textContent='Add a food or recipe';rLib()};
 
 /* settings */
-function rSet(){$('#gP').value=db.goals.p;$('#gC').value=db.goals.c;$('#gM').value=db.goals.mode;
+function nset(){$('#nset').innerHTML=NUT.map(n=>`<div class="nsr"><label class="sw"><input type="checkbox" data-k="${n.k}"${db.on[n.k]?' checked':''}><span>${n.n}</span></label>${db.on[n.k]?`<input class="gi" type="number" inputmode="decimal" data-g="${n.k}" placeholder="Goal (${n.u})" aria-label="${n.n} goal" value="${+db.goals[n.k]||''}">`:''}</div>`).join('')}
+$('#nset').onchange=e=>{const k=e.target.dataset.k;if(!k)return;db.on[k]=e.target.checked;save();nset()};
+$('#nset').oninput=e=>{const k=e.target.dataset.g;if(!k)return;db.goals[k]=+e.target.value||0;save()};
+function rSet(){nset();$('#gP').value=db.goals.p;$('#gC').value=db.goals.c;$('#gM').value=db.goals.mode;
   const ios=/iphone|ipad/i.test(navigator.userAgent)&&!navigator.standalone;$('#ios').hidden=!ios}
 $('#gP').oninput=e=>{db.goals.p=+e.target.value||0;save()};
 $('#gC').oninput=e=>{db.goals.c=+e.target.value||0;save()};
@@ -281,7 +505,7 @@ $('#gM').onchange=e=>{db.goals.mode=e.target.value;save()};
 $('#exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db)],{type:'application/json'}));a.download='seed-backup-'+today()+'.json';a.click()};
 $('#imp').onclick=()=>$('#file').click();
 $('#file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.days||!x.lib||!x.goals)throw 0;if(confirm('Replace all current data with this backup?')){db=x;save();alert('Imported.');render()}}catch(_){alert('That file is not a Seed backup.')}};r.readAsText(f)};
+  r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.days||!x.lib||!x.goals)throw 0;if(confirm('Replace all current data with this backup?')){db=x;db.on=db.on||{};save();alert('Imported.');render()}}catch(_){alert('That file is not a Seed backup.')}};r.readAsText(f)};
 let dp;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;$('#inst').hidden=false});
 $('#inst').onclick=()=>dp&&dp.prompt();
 
