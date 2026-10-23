@@ -87,6 +87,8 @@ dialog::backdrop{background:#1b2a1e80}
 .vwrap{position:relative;border-radius:16px;overflow:hidden;background:#000;margin-top:10px}#vid{width:100%;max-height:44vh;object-fit:cover;display:block}.aim{position:absolute;left:8%;right:8%;top:50%;height:2px;background:#ff5d5d;box-shadow:0 0 8px #ff5d5d}
 .rs{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:var(--in);border:0;border-radius:14px;padding:12px 14px;margin-top:8px;font:inherit;color:var(--tx);text-align:left}.rs small{color:var(--mu);font-size:12px}.rn{text-align:right;flex:none;font-size:14px}
 #fmsg:empty{display:none}.hint a{color:var(--acc)}
+.cl{display:block;font-size:13px;color:var(--mu);margin-top:12px}.cl input{margin-top:4px}.cl small{font-size:12px}
+.cout{background:var(--in);border-radius:16px;padding:4px 14px;margin-top:12px}.crow{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line)}.crow:last-child{border:0}.crow b{font:700 17px var(--serif)}.btn:disabled{opacity:.45}
 </style>
 </head>
 <body>
@@ -151,13 +153,22 @@ dialog::backdrop{background:#1b2a1e80}
 <div class="btns" style="grid-column:1/3;margin-top:0"><button type="button" class="btn" id="fs">Search food database</button><button type="button" class="btn" id="fscan">Scan barcode</button></div>
 <label style="grid-column:1/3">Quantity<div class="qrow"><input id="fq" type="number" step="any" inputmode="decimal" aria-label="Amount"><select id="fm" aria-label="Measure"><option value="">No measure</option><option value="g">grams</option><option value="oz">ounces</option><option value="floz">fluid ounces</option><option value="cup">cups</option><option value="serving">servings</option></select></div></label>
 <label>Calories<input id="fc" type="number" step="any" inputmode="decimal"></label><label>Protein (g)<input id="fp" type="number" step="any" inputmode="decimal"></label><div id="fx" style="display:contents"></div></div>
-<div class="btns" style="justify-content:flex-end;margin-top:18px"><button class="btn" id="fsave" hidden>Save to recipes</button><button class="btn del" id="fdel" hidden>Remove</button><button class="btn" id="fcx">Cancel</button><button class="btn pri" id="fsv">Save</button></div></div></dialog>
+<div class="btns" style="justify-content:flex-end;margin-top:18px"><button class="btn del" id="fdel" hidden>Remove</button><button class="btn" id="fcx">Cancel</button><button class="btn pri" id="fsv">Save</button></div></div></dialog>
 <dialog id="find"><div class="si"><h2 id="fh2" tabindex="-1" autofocus>Find a food</h2>
+<div id="fmain">
 <div class="srow"><input id="fqry" type="search" enterkeyhint="search" placeholder="Name or barcode number" autocomplete="off" aria-label="Search the food database"><button class="btn pri" id="fgo">Search</button></div>
 <div class="btns"><button class="btn" id="fcam">Scan barcode</button><button class="btn" id="fpho">Photo of barcode</button><input type="file" id="fphoto" accept="image/*" capture="environment" hidden></div>
 <div id="scanbox" hidden><div class="vwrap"><video id="vid" playsinline muted autoplay></video><i class="aim"></i></div><div class="btns"><button class="btn" id="fflip" hidden>Flip camera</button><button class="btn" id="fstop">Stop camera</button></div></div>
 <p class="hint" id="fmsg" role="status"></p>
-<div id="fres"></div>
+<div id="fres"></div></div>
+<div id="calc" hidden>
+<button class="btn" id="cback">‹ Back to results</button>
+<label class="cl">Name <small id="cbrand"></small><input id="cn" autocomplete="off"></label>
+<label class="cl">Grams you ate<input id="cg" type="number" step="any" inputmode="decimal"></label>
+<div class="btns" id="cq" style="margin-top:8px"></div>
+<div class="cout" id="cout"></div>
+<div class="btns"><button class="btn pri" id="cadd">Add to today</button><button class="btn" id="csave">Save to recipes</button></div>
+</div>
 <p class="hint">Food data from <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a>. Nutrition is per 100 g and can be incomplete, so check it.</p>
 <div class="btns" style="justify-content:flex-end"><button class="btn" id="fclose">Close</button></div></div></dialog>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -220,20 +231,16 @@ function rToday(){
   $('#sp').textContent=streak('p');$('#sc').textContent=streak('c');$('#st').textContent=streak('t');
 }
 let ei=null;
-let fbase=null;
-const fl=()=>{const n=lk($('#fn').value);return db.lib[n]||(fbase&&lk(fbase.n)===n?fbase:null)};
-function fhint(){const l=fl(),m=$('#fm');if(l){m.value=l.u||'serving';m.disabled=true}else m.disabled=false;
-  $('#fsave').hidden=!(fbase&&!db.lib[lk(fbase.n)]&&lk(fbase.n)===lk($('#fn').value));return l}
+function fhint(){const l=db.lib[lk($('#fn').value)],m=$('#fm');if(l){m.value=l.u||'serving';m.disabled=true}else m.disabled=false;return l}
 function sfill(byName){
   const l=fhint();if(!l)return;
-  if(byName&&!$('#fq').value)$('#fq').value=1;
   const q=+$('#fq').value;if(q>0){$('#fc').value=rnd(l.c*q);$('#fp').value=rnd((l.p||0)*q);act().forEach(n=>{const f=$('#fx-'+n.k);if(f&&l[n.k]!=null)f.value=rnd(l[n.k]*q)})}
 }
 function openSheet(i){
-  ei=i;fbase=null;$('#sug').hidden=true;const it=i==null?{n:'',q:'',c:'',p:''}:db.days[cur].items[i];
+  ei=i;$('#sug').hidden=true;const it=i==null?{n:'',q:'',c:'',p:''}:db.days[cur].items[i];
   $('#fh').textContent=i==null?'Add food':'Edit food';
   $('#fn').value=it.n;$('#fq').value=it.q;$('#fc').value=it.c;$('#fp').value=it.p;$('#fm').value=it.u||'';$('#fx').innerHTML=act().map(n=>`<label>${n.n} (${n.u})<input id="fx-${n.k}" type="number" step="any" inputmode="decimal"></label>`).join('');act().forEach(n=>{$('#fx-'+n.k).value=it[n.k]??''});fhint();
-  $('#fdel').hidden=i==null;$('#sheet').showModal();if(i==null)$('#fn').focus();else $('#fh').focus();
+  $('#fdel').hidden=i==null;$('#sheet').showModal();$('#fh').focus();
 }
 function suggest(){
   const q=$('#fn').value.trim().toLowerCase(),box=$('#sug');
@@ -261,7 +268,9 @@ $('#fdel').onclick=async()=>{if(await ask('Remove this food from the day?')){day
 /* ---- food database (Open Food Facts) + barcode scanning ---- */
 const OFF='https://world.openfoodfacts.org',SAL='https://search.openfoodfacts.org',FIELDS='code,product_name,brands,nutriments,serving_quantity,serving_size';
 const fmsg=m=>{$('#fmsg').textContent=m};
-async function jget(u){const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)throw new Error(r.status);return await r.json()}finally{clearTimeout(t)}}
+async function jget(u){const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);try{const r=await fetch(u,{signal:c.signal});let j=null;try{j=await r.json()}catch(e){}return{status:r.status,json:j}}finally{clearTimeout(t)}}
+const why=e=>e&&e.name==='AbortError'?'timed out':'blocked or offline';
+const tx=v=>v==null?'':Array.isArray(v)?v.map(tx).filter(Boolean).join(', '):typeof v==='object'?tx(v.main||v.en||Object.values(v)[0]):String(v);
 const nm=v=>v!=null&&v!==''&&isFinite(+v)?+v:null;
 function norm(p){
   const n=p&&p.nutriments;if(!n)return null;
@@ -272,49 +281,81 @@ function norm(p){
   const b={u:'g',c:kc/100,p:per('proteins_100g')||0,cb:per('carbohydrates_100g'),ft:per('fat_100g'),fb:per('fiber_100g'),sg:per('sugars_100g'),na:so==null?null:so*10};
   Object.keys(b).forEach(k=>{if(b[k]==null)delete b[k]});
   const sv=nm(p.serving_quantity);
-  return {name:String(p.product_name||'').trim()||'Unnamed product',brand:String(p.brands||'').split(',')[0].trim(),base:b,serve:sv>0?sv:0};
+  return {name:tx(p.product_name).trim()||'Unnamed product',brand:tx(p.brands).split(',')[0].trim(),base:b,serve:sv>0?sv:0};
 }
 let found=[];
 async function doSearch(q){
   q=q.trim();if(!q)return;
   stopScan();fmsg('Searching…');$('#fres').innerHTML='';found=[];
+  const bar=/^\d{8,14}$/.test(q),bad=[];
   try{
     let items=[];
-    if(/^\d{8,14}$/.test(q)){
-      const j=await jget(`${OFF}/api/v2/product/${q}.json?fields=${FIELDS}`);
-      if(!(j&&j.status===1&&j.product)){fmsg('That barcode is not in Open Food Facts yet. You can enter the food by hand.');return}
-      items=[norm(j.product)].filter(Boolean);
-      if(!items.length){fmsg('Found "'+(j.product.product_name||'this product')+'" but it has no nutrition info. You can enter it by hand.');return}
+    if(bar){
+      let prod=null,missing=false;
+      for(const u of [`${OFF}/api/v2/product/${q}?fields=${FIELDS}`,`${OFF}/api/v0/product/${q}.json?fields=${FIELDS}`]){
+        try{const r=await jget(u);
+          if(r.json&&r.json.status===1&&r.json.product){prod=r.json.product;break}
+          if(r.status===404||(r.json&&r.json.status===0)){missing=true;break}
+          bad.push('HTTP '+r.status)}catch(e){bad.push(why(e))}}
+      if(!prod){
+        if(missing){fmsg('That barcode is not in Open Food Facts yet. You can enter the food by hand.');return}
+        throw new Error(bad.join(', '))}
+      items=[norm(prod)].filter(Boolean);
+      if(!items.length){fmsg('Found "'+(tx(prod.product_name)||'this product')+'" but it has no nutrition info. You can enter it by hand.');return}
     }else{
-      const srcs=[async()=>(await jget(`${SAL}/search?q=${encodeURIComponent(q)}&page_size=12&fields=${FIELDS}`)).hits,
-                  async()=>(await jget(`${OFF}/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=12&fields=${FIELDS}`)).products];
+      const srcs=[['search',`${SAL}/search?q=${encodeURIComponent(q)}&page_size=12&langs=en&fields=${FIELDS}`,j=>j.hits],
+                  ['backup search',`${OFF}/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=12&fields=${FIELDS}`,j=>j.products]];
       let ok=false;
-      for(const f of srcs){try{const l=await f();if(Array.isArray(l)){ok=true;items=l.map(norm).filter(Boolean);if(items.length)break}}catch(e){}}
-      if(!ok)throw new Error('net');
+      for(const [nme,u,pick] of srcs){
+        try{const r=await jget(u),l=r.json&&pick(r.json);
+          if(Array.isArray(l)){ok=true;items=l.map(norm).filter(Boolean);if(items.length)break}
+          else bad.push(nme+' HTTP '+r.status)}catch(e){bad.push(nme+' '+why(e))}}
+      if(!ok)throw new Error(bad.join(', '));
       if(!items.length){fmsg('No foods with nutrition info found. Try fewer or different words.');return}
     }
     found=items;
     $('#fres').innerHTML=items.map((r,i)=>`<button class="rs" data-i="${i}"><span><b>${esc(r.name)}</b><br><small>${esc(r.brand)}</small></span><span class="rn">${Math.round(r.base.c*100)} cal<br><small>${rnd((r.base.p||0)*100)} g protein, per 100 g</small></span></button>`).join('');
     fmsg(items.length===1?'Found it. Tap it to use it.':items.length+' results. Tap one to use it.');
-  }catch(e){fmsg("Couldn't reach Open Food Facts. Check your connection and try again.")}
+    if(bar&&items.length===1)showCalc(items[0]);
+  }catch(e){fmsg("Couldn't get a result from Open Food Facts ("+(e&&e.message||'unknown problem')+"). Check your connection and try again in a minute.")}
 }
-function useResult(r){
-  let n=r.name;if(db.lib[lk(n)])n+=r.brand?' ('+r.brand+')':' (scanned)';
-  fbase={...r.base,n};
-  $('#fn').value=n;$('#fq').value=r.serve||100;$('#sug').hidden=true;
-  $('#find').close();sfill(0);
+$('#fres').onclick=e=>{const b=e.target.closest('.rs');if(b)showCalc(found[+b.dataset.i])};
+let cr=null;
+function showCalc(r){
+  cr=r;$('#fmain').hidden=true;$('#calc').hidden=false;stopScan();
+  $('#cn').value=r.name;$('#cbrand').textContent=r.brand?'('+r.brand+')':'';$('#cg').value=r.serve||100;
+  $('#cq').innerHTML='<button class="btn" data-g="100">100 g</button>'+(r.serve&&r.serve!==100?`<button class="btn" data-g="${r.serve}">1 serving (${rnd(r.serve)} g)</button>`:'');
+  $('#cadd').textContent=cur===today()?'Add to today':'Add to this day';calcOut();
 }
-$('#fres').onclick=e=>{const b=e.target.closest('.rs');if(b)useResult(found[+b.dataset.i])};
+function calcOut(){
+  const q=+$('#cg').value||0,b=cr.base;
+  const rows=[['Calories',b.c*q,' cal',0],['Protein',(b.p||0)*q,' g',1],...NUT.filter(n=>b[n.k]!=null).map(n=>[n.n,b[n.k]*q,' '+n.u,n.u==='mg'?0:1])];
+  $('#cout').innerHTML=rows.map(r=>`<div class="crow"><span>${r[0]}</span><b>${Math.round(r[1]*10**r[3])/10**r[3]}${r[2]}</b></div>`).join('');
+  $('#cadd').disabled=!(q>0);
+}
+$('#cg').oninput=calcOut;
+$('#cq').onclick=e=>{const g=e.target.dataset.g;if(g){$('#cg').value=g;calcOut()}};
+$('#cback').onclick=()=>{$('#calc').hidden=true;$('#fmain').hidden=false};
+$('#cadd').onclick=()=>{
+  const q=+$('#cg').value;if(!(q>0))return;
+  const b=cr.base,it={n:$('#cn').value.trim()||cr.name,q,u:'g',c:rnd(b.c*q),p:rnd((b.p||0)*q)};
+  NUT.forEach(n=>{if(b[n.k]!=null)it[n.k]=rnd(b[n.k]*q)});
+  day(cur).items.push(it);save();$('#find').close();$('#sheet').close();toast(cur===today()?'Added to today':'Added to this day');rToday();
+};
+$('#csave').onclick=()=>{
+  const n=$('#cn').value.trim()||cr.name;
+  if(db.lib[lk(n)]){toast('"'+n+'" is already in recipes. Rename it to save another.');return}
+  db.lib[lk(n)]={...cr.base,n};save();toast('Saved to recipes');
+};
 $('#fgo').onclick=()=>doSearch($('#fqry').value);
 $('#fqry').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();doSearch($('#fqry').value)}};
-function openFind(scan){$('#fres').innerHTML='';found=[];fmsg('');$('#find').showModal();if(scan)startScan();else $('#fqry').focus()}
+function openFind(scan){$('#fres').innerHTML='';found=[];fmsg('');$('#calc').hidden=true;$('#fmain').hidden=false;$('#find').showModal();if(scan)startScan();else $('#fqry').focus()}
 $('#fs').onclick=()=>openFind(false);$('#fscan').onclick=()=>openFind(true);
 $('#fcam').onclick=startScan;$('#fstop').onclick=()=>{stopScan();fmsg('')};
 $('#fflip').onclick=()=>{facing=facing==='environment'?'user':'environment';startScan()};
 $('#fclose').onclick=()=>$('#find').close();
-$('#find').onclose=stopScan;
+$('#find').onclose=()=>{stopScan();$('#calc').hidden=true;$('#fmain').hidden=false};
 $('#find').onclick=e=>{if(e.target===e.currentTarget)e.currentTarget.close()};
-$('#fsave').onclick=()=>{const n=$('#fn').value.trim();if(!fbase||!n)return;db.lib[lk(n)]={...fbase,n};save();fbase=null;fhint();toast('Saved to recipes')};
 
 /* camera + photo */
 let det=null,detTried=false,stream=null,scanning=false,facing='environment';
