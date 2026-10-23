@@ -171,7 +171,7 @@ dialog::backdrop{background:#1b2a1e80}
 <div class="cout" id="cout"></div>
 <div class="btns"><button class="btn pri" id="cadd">Add to today</button><button class="btn" id="csave">Save to recipes</button></div>
 </div>
-<p class="hint">Food data from <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a>. Nutrition is per 100 g and can be incomplete, so check it.</p>
+<!-- <p class="hint">Food data from <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a>. Nutrition is per 100 g and can be incomplete, so check it.</p> -->
 <div class="btns" style="justify-content:flex-end"><button class="btn" id="fclose">Close</button></div></div></dialog>
 <div id="toast" role="status" aria-live="polite"></div>
 <nav class="tabs" role="tablist"><button data-t="today">Today</button><button data-t="trends">Trends</button><button data-t="lib">Recipes</button><button data-t="set">User</button></nav>
@@ -334,7 +334,8 @@ async function getProd(q){
 }
 const OFF_TEXT=false; /* Open Food Facts name search is switched off (unreliable). Barcode lookup still uses it. Set true to bring text search back. */
 let GF=null;
-async function loadGF(){if(GF)return GF;try{const r=await fetch('./foods.json');GF=(await r.json()).map(a=>({a,l:a[0].toLowerCase()}))}catch(e){GF=[]}return GF}
+let gfErr=false;
+async function loadGF(){if(GF)return GF;try{const r=await fetch('./foods.json');if(!r.ok)throw 0;GF=(await r.json()).map(a=>({a,l:a[0].toLowerCase()}));gfErr=false}catch(e){gfErr=true;return []}return GF}
 async function localFind(q){
   const t=q.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);if(!t.length)return [];
   const g=await loadGF(),out=[];
@@ -352,13 +353,13 @@ let lt=null;
 $('#fqry').oninput=()=>{clearTimeout(lt);lt=setTimeout(async()=>{const q=$('#fqry').value.trim();
   if(q.length<2||/^\d+$/.test(q)){return}
   const l=await localFind(q);if($('#fqry').value.trim()!==q)return;
-  showItems(l,l.length?l.length+' foods. Tap one to use it.':'No foods match. Try fewer or different words, or enter it by hand.')},150)};
+  showItems(l,l.length?l.length+' foods. Tap one to use it.':gfErr?"The food list didn't load. Check your connection and try again. If it keeps happening, make sure foods.json is uploaded next to index.html.":'No foods match. Try fewer or different words, or enter it by hand.')},150)};
 async function doSearch(q){
   q=q.trim();if(!q||Date.now()<cool)return;
   stopScan();fmsg('Searching…');$('#fres').innerHTML='';found=[];
   const bar=/^\d{8,14}$/.test(q),bad=[];
   const loc=bar?[]:await localFind(q);
-  if(!bar&&!OFF_TEXT){showItems(loc,loc.length?loc.length+' foods. Tap one to use it.':'No foods match. Try fewer or different words, or enter it by hand.');return}
+  if(!bar&&!OFF_TEXT){showItems(loc,loc.length?loc.length+' foods. Tap one to use it.':gfErr?"The food list didn't load. Check your connection and try again. If it keeps happening, make sure foods.json is uploaded next to index.html.":'No foods match. Try fewer or different words, or enter it by hand.');return}
   try{
     let items=[];
     if(bar){
